@@ -1,0 +1,387 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-color: #fafaf9;
+  --grid-color: rgba(15, 23, 42, 0.03);
+  --text-color: #0f172a;
+  --surface-color: rgba(255, 255, 255, 0.7);
+  --border-color: rgba(15, 23, 42, 0.1);
+  --accent-color: #d98f50;
+  --accent-hover: #c17536;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.dark {
+  --bg-color: #0B1120;
+  --grid-color: rgba(255, 255, 255, 0.03);
+  --text-color: #f8fafc;
+  --surface-color: rgba(15, 23, 42, 0.7);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --accent-color: #e2a876;
+  --accent-hover: #cf935f;
+  --glass-border: 1px solid rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  background-image: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center center;
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  line-height: 1.6;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  background: var(--surface-color);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: var(--border-color) 1px solid;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+
+.header-left, .header-center, .header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.header-center {
+  flex: 2;
+  justify-content: center;
+}
+
+.header-right {
+  flex: 1;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.theme-switcher-container {
+  display: flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: transparent;
+}
+
+.theme-options {
+  display: flex;
+  gap: 0.25rem;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.theme-switcher-container:hover .theme-options {
+  max-width: 150px;
+  opacity: 1;
+  padding-right: 0.5rem;
+}
+
+.current-theme-btn {
+  cursor: default;
+}
+
+.app-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-title svg {
+  color: var(--accent-color);
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-color);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover:not(:disabled):not(.active) {
+  background: var(--surface-color);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+button.active:hover:not(:disabled) {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+button.active {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+button.icon-btn {
+  padding: 0.5rem;
+  border-radius: 50%;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.editor-container {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-textarea {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 1rem;
+  background: transparent;
+  color: var(--text-color);
+  border: none;
+  resize: none;
+  outline: none;
+  line-height: 1.6;
+}
+
+.viewer-container {
+  flex: 1;
+  height: 100%;
+  padding: 2rem;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  font-size: 1rem;
+}
+
+.divider {
+  width: 1px;
+  background: var(--border-color);
+  height: 100%;
+}
+
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.5rem;
+  background: var(--surface-color);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: var(--border-color) 1px solid;
+  z-index: 10;
+}
+
+.app-footer a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.app-footer a:hover {
+  color: var(--accent-color);
+}
+
+@media (max-width: 768px) {
+  .header-center {
+    display: none;
+  }
+}
+
+.markdown-body {
+  color: var(--text-color);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.7;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-body h1 { font-size: 2.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
+.markdown-body h2 { font-size: 1.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
+.markdown-body h3 { font-size: 1.5rem; }
+
+.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre, .markdown-body details {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.markdown-body a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+.markdown-body a:hover {
+  text-decoration: underline;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  box-sizing: content-box;
+  background-color: transparent;
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+.markdown-body code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: var(--surface-color);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+}
+
+.markdown-body pre {
+  background-color: #1e1e1e !important;
+  border-radius: 8px;
+  padding: 16px !important;
+  overflow: auto;
+  box-shadow: inset 0 0 0 1px var(--border-color);
+}
+
+.markdown-body pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #fff;
+}
+
+.markdown-body blockquote {
+  padding: 0 1em;
+  color: #64748b;
+  border-left: 0.25em solid var(--border-color);
+}
+
+.dark .markdown-body blockquote {
+  color: #94a3b8;
+}
+
+.markdown-body table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.markdown-body table th, .markdown-body table td {
+  padding: 6px 13px;
+  border: 1px solid var(--border-color);
+}
+
+.markdown-body table tr:nth-child(2n) {
+  background-color: var(--surface-color);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  header, .editor-container, .divider, .app-footer {
+    display: none !important;
+  }
+  
+  .viewer-container {
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .markdown-body {
+    max-width: none;
+  }
+  
+  .markdown-body pre {
+    background-color: #f6f8fa !important;
+    box-shadow: none;
+    border: 1px solid #d0d7de;
+  }
+  
+  .markdown-body pre code {
+    color: #24292f;
+  }
+}
