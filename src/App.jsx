@@ -11,6 +11,27 @@ function App() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('md-theme') || 'system';
   });
+  const [customHeader, setCustomHeader] = useState(null);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setCustomHeader(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+    // Reset input value to allow uploading the same file again if needed
+    e.target.value = null;
+  };
+
+  const handleImageLink = () => {
+    const url = window.prompt("Enter the image URL:");
+    if (url) {
+      setCustomHeader(url);
+    }
+  };
 
   // Save content to local storage
   useEffect(() => {
@@ -58,6 +79,8 @@ function App() {
         theme={theme} 
         setTheme={setTheme}
         onPrint={handlePrint}
+        onImageUpload={handleImageUpload}
+        onImageLink={handleImageLink}
       />
       <main className="main-content">
         {(viewMode === 'editor' || viewMode === 'split') && (
@@ -67,7 +90,11 @@ function App() {
         {viewMode === 'split' && <div className="divider"></div>}
         
         {(viewMode === 'viewer' || viewMode === 'split') && (
-          <Viewer markdown={markdown} />
+          <Viewer 
+            markdown={markdown} 
+            customHeader={customHeader} 
+            onRemoveHeader={() => setCustomHeader(null)} 
+          />
         )}
       </main>
       <footer className="app-footer">

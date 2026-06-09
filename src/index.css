@@ -45,6 +45,7 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   line-height: 1.6;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -52,6 +53,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
 }
 
 header {
@@ -68,10 +70,22 @@ header {
   box-shadow: var(--shadow-sm);
 }
 
-.header-left, .header-center, .header-right {
+.header-left, .header-center, .header-right, .header-actions, .header-right-always {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.mobile-menu-container {
+  display: contents;
+}
+
+.mobile-menu-header {
+  display: none;
+}
+
+.mobile-menu-btn {
+  display: none !important;
 }
 
 .header-left {
@@ -86,7 +100,6 @@ header {
 .header-right {
   flex: 1;
   justify-content: flex-end;
-  gap: 1rem;
 }
 
 .theme-switcher-container {
@@ -251,9 +264,107 @@ button.icon-btn {
 }
 
 @media (max-width: 768px) {
-  .header-center {
+  .hide-on-mobile {
     display: none;
   }
+  .mobile-menu-btn {
+    display: inline-flex !important;
+  }
+  .mobile-menu-container {
+    display: flex;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: var(--surface-color);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-left: 1px solid var(--border-color);
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.5rem;
+    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+  }
+  .mobile-menu-container.open {
+    right: 0;
+  }
+  .mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .mobile-menu-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+  }
+  .header-center {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .header-center button {
+    justify-content: flex-start;
+  }
+  .header-right {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 1.5rem;
+  }
+  .header-actions {
+    justify-content: center;
+  }
+  .theme-switcher-container {
+    justify-content: center;
+  }
+  .theme-options {
+    max-width: none;
+    opacity: 1;
+    overflow: visible;
+    gap: 1rem;
+  }
+  .current-theme-btn {
+    display: none !important;
+  }
+}
+
+.pdf-custom-header-container {
+  position: relative;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.pdf-custom-header {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.remove-header-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--surface-color);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--border-color);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.pdf-custom-header-container:hover .remove-header-btn {
+  opacity: 1;
+}
+
+.remove-header-btn:hover {
+  background: var(--bg-color);
+  color: #ef4444;
 }
 
 .markdown-body {
@@ -361,7 +472,7 @@ button.icon-btn {
     color: black !important;
   }
   
-  header, .editor-container, .divider, .app-footer {
+  header, .editor-container, .divider, .app-footer, .remove-header-btn {
     display: none !important;
   }
   
@@ -384,4 +495,37 @@ button.icon-btn {
   .markdown-body pre code {
     color: #24292f;
   }
+}
+
+/* Custom Tooltips */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  padding: 0.4rem 0.75rem;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+}
+
+[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }
