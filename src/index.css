@@ -468,8 +468,28 @@ button.icon-btn {
 }
 
 @media print {
+  :root, .dark {
+    --bg-color: white !important;
+    --text-color: black !important;
+    --surface-color: white !important;
+    --border-color: #ccc !important;
+  }
+
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html, body, #root, .main-content {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+    position: static !important;
+  }
+
   body {
     background-color: white !important;
+    background-image: none !important;
     color: black !important;
   }
   
