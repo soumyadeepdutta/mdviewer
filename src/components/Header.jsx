@@ -12,7 +12,7 @@ export default function Header({ viewMode, setViewMode, theme, setTheme, onPrint
     <header className="animate-fade-in">
       <div className="header-left">
         <div className="app-title">
-          <img src="/logo.png" alt="MDViewer Logo" className="app-logo" style={{ height: '32px', width: '32px', borderRadius: '6px' }} />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="MDViewer Logo" className="app-logo" style={{ height: '32px', width: '32px', borderRadius: '6px' }} />
           <span>MD Viewer</span>
         </div>
       </div>

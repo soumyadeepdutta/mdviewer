@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { X } from 'lucide-react';
+import Mermaid from './Mermaid';
 
 export default function Viewer({ markdown, customHeader, onRemoveHeader }) {
   return (
@@ -22,6 +23,11 @@ export default function Viewer({ markdown, customHeader, onRemoveHeader }) {
           components={{
             code({node, inline, className, children, ...props}) {
               const match = /language-(\w+)/.exec(className || '')
+              
+              if (!inline && match && match[1] === 'mermaid') {
+                return <Mermaid chart={String(children).replace(/\n$/, '')} />
+              }
+
               return !inline && match ? (
                 <SyntaxHighlighter
                   style={vscDarkPlus}

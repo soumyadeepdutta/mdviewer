@@ -550,3 +550,66 @@ button.icon-btn {
   visibility: visible;
   transform: translateX(-50%) translateY(0);
 }
+
+/* Mermaid Styles */
+.mermaid-wrapper {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.mermaid-error {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #ef4444;
+  font-family: 'Consolas', monospace;
+  font-size: 0.9rem;
+  overflow-x: auto;
+}
+
+.mermaid-error pre {
+  margin-top: 1rem;
+  padding: 1rem !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  border-radius: 4px;
+  box-shadow: none !important;
+}
+
+.dark .mermaid-error pre {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Remove black background and padding from the pre tag that wraps the Mermaid component */
+.markdown-body pre:has(.mermaid-wrapper),
+.markdown-body pre:has(.mermaid-error) {
+  background-color: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Hide orphaned mermaid error elements off-screen during normal view so they don't break measurement */
+body > [id^="dmermaid"],
+body > [id^="mermaid"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
+}
+
+@media print {
+  body > [id^="dmermaid"],
+  body > [id^="mermaid"] {
+    display: none !important;
+  }
+}
