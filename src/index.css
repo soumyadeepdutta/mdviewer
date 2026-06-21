@@ -203,7 +203,122 @@ button.icon-btn {
   flex: 1;
   height: 100%;
   display: flex;
+  flex-direction: row; /* Changed to row for the sidebar */
+}
+
+.element-palette {
+  width: 240px;
+  height: 100%;
+  border-right: 1px solid var(--border-color);
+  background: var(--surface-color);
+  display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.element-palette.collapsed {
+  width: 60px;
+}
+
+.palette-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  min-height: 70px;
+}
+
+.palette-titles {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.toggle-palette-btn {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 8px !important;
+}
+
+.element-palette.collapsed .palette-header {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.palette-subtitle {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-color);
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+.palette-items {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.element-palette.collapsed .palette-items {
+  padding: 1rem 0.5rem;
+  align-items: center;
+}
+
+.draggable-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: grab;
+  user-select: none;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.element-palette.collapsed .draggable-item {
+  justify-content: center;
+  padding: 0.75rem 0;
+}
+
+.element-palette.collapsed .item-label,
+.element-palette.collapsed .drag-handle {
+  display: none;
+}
+
+.draggable-item:hover {
+  border-color: var(--accent-color);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.draggable-item:active {
+  cursor: grabbing;
+}
+
+.drag-handle {
+  opacity: 0.4;
+}
+
+.item-label {
+  flex: 1;
+  font-weight: 500;
 }
 
 .editor-textarea {
@@ -589,9 +704,10 @@ button.icon-btn {
   background-color: rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Remove black background and padding from the pre tag that wraps the Mermaid component */
+/* Remove black background and padding from the pre tag that wraps the Mermaid component and our SyntaxHighlighter */
 .markdown-body pre:has(.mermaid-wrapper),
-.markdown-body pre:has(.mermaid-error) {
+.markdown-body pre:has(.mermaid-error),
+.markdown-body pre:has(.code-block-wrapper) {
   background-color: transparent !important;
   padding: 0 !important;
   box-shadow: none !important;
@@ -612,4 +728,41 @@ body > [id^="mermaid"] {
   body > [id^="mermaid"] {
     display: none !important;
   }
+}
+
+/* Code Block Theme Toggle styles */
+.code-block-wrapper {
+  position: relative;
+}
+
+.code-block-wrapper code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  color: inherit !important;
+}
+
+.code-theme-toggle {
+  position: absolute !important;
+  top: 0.5rem;
+  right: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+  opacity: 0.4; /* Slightly visible by default for discoverability */
+}
+
+.code-block-wrapper:hover .code-theme-toggle {
+  opacity: 1;
+}
+
+.code-theme-toggle:hover {
+  transform: scale(1.1);
 }

@@ -11,6 +11,17 @@ function App() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('md-theme') || 'system';
   });
+  
+  // Initialize codeTheme based on current theme, or default to dark
+  const [codeTheme, setCodeTheme] = useState(() => {
+    if (theme === 'light') return 'light';
+    if (theme === 'dark') return 'dark';
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'dark';
+  });
+
   const [customHeader, setCustomHeader] = useState(null);
 
   const handleImageUpload = (e) => {
@@ -38,7 +49,7 @@ function App() {
     localStorage.setItem('md-content', markdown);
   }, [markdown]);
 
-  // Handle Theme
+  // Handle Theme and One-Way Sync to Code Theme
   useEffect(() => {
     localStorage.setItem('md-theme', theme);
     
@@ -46,10 +57,13 @@ function App() {
     root.classList.remove('light', 'dark');
 
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const systemTheme = isDark ? 'dark' : 'light';
       root.classList.add(systemTheme);
+      setCodeTheme(systemTheme); // One-way sync
     } else {
       root.classList.add(theme);
+      setCodeTheme(theme); // One-way sync
     }
   }, [theme]);
 
@@ -60,7 +74,9 @@ function App() {
       if (theme === 'system') {
         const root = window.document.documentElement;
         root.classList.remove('light', 'dark');
-        root.classList.add(mediaQuery.matches ? 'dark' : 'light');
+        const isDark = mediaQuery.matches;
+        root.classList.add(isDark ? 'dark' : 'light');
+        setCodeTheme(isDark ? 'dark' : 'light'); // Sync dynamically when system changes
       }
     };
     mediaQuery.addEventListener('change', handleChange);
@@ -94,6 +110,8 @@ function App() {
             markdown={markdown} 
             customHeader={customHeader} 
             onRemoveHeader={() => setCustomHeader(null)} 
+            codeTheme={codeTheme}
+            setCodeTheme={setCodeTheme}
           />
         )}
       </main>
