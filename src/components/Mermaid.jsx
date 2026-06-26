@@ -1,10 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { ZoomIn, ZoomOut, RotateCcw, Maximize, Minimize, Lock, Unlock } from 'lucide-react';
 
 export default function Mermaid({ chart }) {
   const containerRef = useRef(null);
   const [svgContent, setSvgContent] = useState('');
   const [error, setError] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLocked, setIsLocked] = useState(true);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
 
   useEffect(() => {
     let isMounted = true;
@@ -85,11 +99,76 @@ export default function Mermaid({ chart }) {
     );
   }
 
+  const fullscreenStyle = isFullscreen ? {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    zIndex: 9999,
+    backgroundColor: 'var(--bg-color)',
+    padding: 0,
+    margin: 0,
+    borderRadius: 0,
+    border: 'none',
+    display: 'flex',
+    flexDirection: 'column'
+  } : {
+    position: 'relative', 
+    overflow: 'hidden', 
+    padding: 0, 
+    minHeight: '300px', 
+    display: 'block'
+  };
+
   return (
-    <div 
-      className="mermaid-wrapper" 
-      ref={containerRef}
-      dangerouslySetInnerHTML={{ __html: svgContent }} 
-    />
+    <div className={`mermaid-wrapper ${isFullscreen ? 'fullscreen' : ''}`} style={fullscreenStyle}>
+      <TransformWrapper
+        initialScale={1}
+        minScale={0.1}
+        maxScale={10}
+        centerOnInit={true}
+        wheel={{ wheelDisabled: isLocked }}
+        panning={{ disabled: isLocked }}
+        pinch={{ disabled: isLocked }}
+        doubleClick={{ disabled: isLocked }}
+      >
+        {({ zoomIn, zoomOut, resetTransform }) => (
+          <>
+            <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '4px', backgroundColor: 'var(--bg-color)', padding: '4px', borderRadius: '6px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)', transition: 'all 0.2s ease' }}>
+              <button type="button" className="icon-btn" onClick={() => setIsLocked(!isLocked)} title={isLocked ? "Unlock Diagram" : "Lock Diagram"} style={{ width: '28px', height: '28px', padding: 0, border: 'none', background: isLocked ? 'rgba(239, 68, 68, 0.1)' : 'transparent', color: isLocked ? '#ef4444' : 'inherit' }}>
+                {isLocked ? <Lock size={14} /> : <Unlock size={14} />}
+              </button>
+              
+              {!isLocked && (
+                <>
+                  <div style={{ width: '1px', backgroundColor: 'var(--border-color)', margin: '4px 2px' }}></div>
+                  <button type="button" className="icon-btn" onClick={() => zoomIn()} title="Zoom In" style={{ width: '28px', height: '28px', padding: 0, border: 'none', background: 'transparent' }}><ZoomIn size={16} /></button>
+                  <button type="button" className="icon-btn" onClick={() => zoomOut()} title="Zoom Out" style={{ width: '28px', height: '28px', padding: 0, border: 'none', background: 'transparent' }}><ZoomOut size={16} /></button>
+                  <button type="button" className="icon-btn" onClick={() => resetTransform()} title="Reset Zoom" style={{ width: '28px', height: '28px', padding: 0, border: 'none', background: 'transparent' }}><RotateCcw size={16} /></button>
+                </>
+              )}
+              
+              <div style={{ width: '1px', backgroundColor: 'var(--border-color)', margin: '4px 2px' }}></div>
+              <button type="button" className="icon-btn" onClick={() => { 
+                const enteringFullscreen = !isFullscreen;
+                setIsFullscreen(enteringFullscreen); 
+                if (enteringFullscreen) setIsLocked(false);
+                setTimeout(resetTransform, 100); 
+              }} title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"} style={{ width: '28px', height: '28px', padding: 0, border: 'none', background: 'transparent' }}>
+                {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+              </button>
+            </div>
+            <TransformComponent wrapperStyle={{ width: '100%', height: '100%', minHeight: isFullscreen ? '100vh' : '300px' }} contentStyle={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1.5rem' }}>
+              <div 
+                ref={containerRef}
+                dangerouslySetInnerHTML={{ __html: svgContent }} 
+                style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}
+              />
+            </TransformComponent>
+          </>
+        )}
+      </TransformWrapper>
+    </div>
   );
 }
