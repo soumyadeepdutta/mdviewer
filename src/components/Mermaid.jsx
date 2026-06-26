@@ -117,8 +117,8 @@ export default function Mermaid({ chart }) {
     position: 'relative', 
     overflow: 'hidden', 
     padding: 0, 
-    minHeight: '300px', 
-    display: 'block'
+    display: 'block',
+    width: '100%'
   };
 
   return (
@@ -128,10 +128,11 @@ export default function Mermaid({ chart }) {
         minScale={0.1}
         maxScale={10}
         centerOnInit={true}
-        wheel={{ wheelDisabled: isLocked }}
-        panning={{ disabled: isLocked }}
-        pinch={{ disabled: isLocked }}
-        doubleClick={{ disabled: isLocked }}
+        disabled={isLocked && !isFullscreen}
+        wheel={{ wheelDisabled: isLocked && !isFullscreen }}
+        panning={{ disabled: isLocked && !isFullscreen }}
+        pinch={{ disabled: isLocked && !isFullscreen }}
+        doubleClick={{ disabled: isLocked && !isFullscreen }}
       >
         {({ zoomIn, zoomOut, resetTransform }) => (
           <>
@@ -159,7 +160,21 @@ export default function Mermaid({ chart }) {
                 {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
               </button>
             </div>
-            <TransformComponent wrapperStyle={{ width: '100%', height: '100%', minHeight: isFullscreen ? '100vh' : '300px' }} contentStyle={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1.5rem' }}>
+            <TransformComponent 
+              wrapperStyle={{ 
+                width: '100%', 
+                height: isFullscreen ? '100%' : 'auto', 
+                minHeight: isFullscreen ? '100vh' : 'auto' 
+              }} 
+              contentStyle={{ 
+                width: '100%', 
+                height: isFullscreen ? '100%' : 'auto', 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                padding: isFullscreen ? '2rem' : '1.5rem' 
+              }}
+            >
               <div 
                 ref={containerRef}
                 dangerouslySetInnerHTML={{ __html: svgContent }} 
