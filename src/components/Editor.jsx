@@ -18,7 +18,7 @@ const PALETTE_ITEMS = [
   { id: 'mermaid', icon: Network, label: 'Mermaid Flowchart', text: '\n```mermaid\ngraph LR\n    A[Start] --> B{Decision}\n    B -->|Yes| C[Process]\n    B -->|No| D[End]\n```\n\n' },
 ];
 
-export default function Editor({ markdown, setMarkdown }) {
+export default function Editor({ markdown, setMarkdown, editorRef, onScroll, onMouseEnter, onTouchStart }) {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   
   const handleDragStart = (e, text) => {
@@ -65,6 +65,10 @@ export default function Editor({ markdown, setMarkdown }) {
       </div>
       
       <textarea
+        ref={editorRef}
+        onScroll={onScroll}
+        onMouseEnter={onMouseEnter}
+        onTouchStart={onTouchStart}
         className="editor-textarea"
         value={markdown}
         onChange={(e) => setMarkdown(e.target.value)}

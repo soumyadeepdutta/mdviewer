@@ -1,7 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Editor from './components/Editor';
 import Viewer from './components/Viewer';
+
+const MermaidDesigner = lazy(() => import('./components/MermaidDesigner'));
+
+export const BODY_FONTS = {
+  'Inter': "'Inter', system-ui, -apple-system, sans-serif",
+  'Roboto': "'Roboto', sans-serif",
+  'Aptos': "'Aptos', 'Segoe UI', system-ui, sans-serif",
+  'Verdana': "'Verdana', Geneva, sans-serif",
+  'Times New Roman': "'Times New Roman', Times, serif",
+  'Merriweather': "'Merriweather', Georgia, serif",
+  'Sans-Serif': "sans-serif"
+};
+
+export const CODE_FONTS = {
+  'Fira Code': "'Fira Code', monospace",
+  'Roboto Mono': "'Roboto Mono', monospace",
+  'Consolas': "'Consolas', 'Monaco', monospace",
+  'Monaco': "'Monaco', 'Consolas', monospace",
+  'JetBrains Mono': "'JetBrains Mono', monospace"
+};
 
 function App() {
   const [markdown, setMarkdown] = useState(() => {
@@ -12,6 +33,14 @@ function App() {
     return localStorage.getItem('md-theme') || 'system';
   });
   
+  const [bodyFont, setBodyFont] = useState(() => {
+    return localStorage.getItem('md-body-font') || 'Inter';
+  });
+
+  const [codeFont, setCodeFont] = useState(() => {
+    return localStorage.getItem('md-code-font') || 'Fira Code';
+  });
+
   // Initialize codeTheme based on current theme, or default to dark
   const [codeTheme, setCodeTheme] = useState(() => {
     if (theme === 'light') return 'light';
@@ -23,6 +52,22 @@ function App() {
   });
 
   const [customHeader, setCustomHeader] = useState(null);
+  const [isConfidential, setIsConfidential] = useState(() => {
+    return localStorage.getItem('md-confidential') === 'true';
+  });
+
+  const [docFooter, setDocFooter] = useState(() => {
+    try {
+      const saved = localStorage.getItem('md-doc-footer');
+      return saved ? JSON.parse(saved) : { preparedBy: '', designation: '', date: '', place: '' };
+    } catch (e) {
+      return { preparedBy: '', designation: '', date: '', place: '' };
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('md-doc-footer', JSON.stringify(docFooter));
+  }, [docFooter]);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -48,6 +93,58 @@ function App() {
   useEffect(() => {
     localStorage.setItem('md-content', markdown);
   }, [markdown]);
+
+  // Save confidential state to local storage
+  useEffect(() => {
+    localStorage.setItem('md-confidential', isConfidential ? 'true' : 'false');
+  }, [isConfidential]);
+
+  const [fontSize, setFontSize] = useState(() => {
+    const saved = localStorage.getItem('md-font-size');
+    return saved ? Number(saved) : 16;
+  });
+
+  const [lineHeight, setLineHeight] = useState(() => {
+    const saved = localStorage.getItem('md-line-height');
+    return saved ? Number(saved) : 1.7;
+  });
+
+  const [paragraphSpacing, setParagraphSpacing] = useState(() => {
+    const saved = localStorage.getItem('md-paragraph-spacing');
+    return saved ? Number(saved) : 16;
+  });
+
+  // Sync Body Font CSS Variable
+  useEffect(() => {
+    localStorage.setItem('md-body-font', bodyFont);
+    const fontStr = BODY_FONTS[bodyFont] || BODY_FONTS['Inter'];
+    document.documentElement.style.setProperty('--body-font-family', fontStr);
+  }, [bodyFont]);
+
+  // Sync Code Font CSS Variable
+  useEffect(() => {
+    localStorage.setItem('md-code-font', codeFont);
+    const fontStr = CODE_FONTS[codeFont] || CODE_FONTS['Fira Code'];
+    document.documentElement.style.setProperty('--code-font-family', fontStr);
+  }, [codeFont]);
+
+  // Sync Font Size CSS Variable
+  useEffect(() => {
+    localStorage.setItem('md-font-size', fontSize);
+    document.documentElement.style.setProperty('--doc-font-size', `${fontSize}px`);
+  }, [fontSize]);
+
+  // Sync Line Height CSS Variable
+  useEffect(() => {
+    localStorage.setItem('md-line-height', lineHeight);
+    document.documentElement.style.setProperty('--doc-line-height', `${lineHeight}`);
+  }, [lineHeight]);
+
+  // Sync Paragraph Spacing CSS Variable
+  useEffect(() => {
+    localStorage.setItem('md-paragraph-spacing', paragraphSpacing);
+    document.documentElement.style.setProperty('--doc-paragraph-spacing', `${paragraphSpacing}px`);
+  }, [paragraphSpacing]);
 
   // Handle Theme and One-Way Sync to Code Theme
   useEffect(() => {
@@ -83,6 +180,55 @@ function App() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
 
+  const editorRef = React.useRef(null);
+  const viewerRef = React.useRef(null);
+  const scrollingSourceRef = React.useRef(null);
+  const isSyncingRef = React.useRef(false);
+
+  const handleEditorScroll = (e) => {
+    if (viewMode !== 'split') return;
+    if (isSyncingRef.current) return;
+    if (scrollingSourceRef.current && scrollingSourceRef.current !== 'editor') return;
+
+    const editorEl = e.target;
+    const viewerEl = viewerRef.current;
+    if (!editorEl || !viewerEl) return;
+
+    const maxEditorScroll = editorEl.scrollHeight - editorEl.clientHeight;
+    if (maxEditorScroll <= 0) return;
+
+    const percentage = editorEl.scrollTop / maxEditorScroll;
+    const maxViewerScroll = viewerEl.scrollHeight - viewerEl.clientHeight;
+
+    isSyncingRef.current = true;
+    viewerEl.scrollTop = percentage * maxViewerScroll;
+    requestAnimationFrame(() => {
+      isSyncingRef.current = false;
+    });
+  };
+
+  const handleViewerScroll = (e) => {
+    if (viewMode !== 'split') return;
+    if (isSyncingRef.current) return;
+    if (scrollingSourceRef.current && scrollingSourceRef.current !== 'viewer') return;
+
+    const viewerEl = e.target;
+    const editorEl = editorRef.current;
+    if (!viewerEl || !editorEl) return;
+
+    const maxViewerScroll = viewerEl.scrollHeight - viewerEl.clientHeight;
+    if (maxViewerScroll <= 0) return;
+
+    const percentage = viewerEl.scrollTop / maxViewerScroll;
+    const maxEditorScroll = editorEl.scrollHeight - editorEl.clientHeight;
+
+    isSyncingRef.current = true;
+    editorEl.scrollTop = percentage * maxEditorScroll;
+    requestAnimationFrame(() => {
+      isSyncingRef.current = false;
+    });
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -97,23 +243,63 @@ function App() {
         onPrint={handlePrint}
         onImageUpload={handleImageUpload}
         onImageLink={handleImageLink}
+        customHeader={customHeader}
+        onRemoveHeader={() => setCustomHeader(null)}
+        isConfidential={isConfidential}
+        setIsConfidential={setIsConfidential}
+        bodyFont={bodyFont}
+        setBodyFont={setBodyFont}
+        codeFont={codeFont}
+        setCodeFont={setCodeFont}
+        docFooter={docFooter}
+        setDocFooter={setDocFooter}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
+        lineHeight={lineHeight}
+        setLineHeight={setLineHeight}
+        paragraphSpacing={paragraphSpacing}
+        setParagraphSpacing={setParagraphSpacing}
       />
       <main className="main-content">
-        {(viewMode === 'editor' || viewMode === 'split') && (
-          <Editor markdown={markdown} setMarkdown={setMarkdown} />
-        )}
-        
-        {viewMode === 'split' && <div className="divider"></div>}
-        
-        {(viewMode === 'viewer' || viewMode === 'split') && (
-          <Viewer 
-            markdown={markdown} 
-            customHeader={customHeader} 
-            onRemoveHeader={() => setCustomHeader(null)} 
-            codeTheme={codeTheme}
-            setCodeTheme={setCodeTheme}
-          />
-        )}
+        <Routes>
+          <Route path="/" element={
+            <>
+              {(viewMode === 'editor' || viewMode === 'split') && (
+                <Editor 
+                  markdown={markdown} 
+                  setMarkdown={setMarkdown} 
+                  editorRef={editorRef}
+                  onScroll={handleEditorScroll}
+                  onMouseEnter={() => { scrollingSourceRef.current = 'editor'; }}
+                  onTouchStart={() => { scrollingSourceRef.current = 'editor'; }}
+                />
+              )}
+              
+              {viewMode === 'split' && <div className="divider"></div>}
+              
+              {(viewMode === 'viewer' || viewMode === 'split') && (
+                <Viewer 
+                  markdown={markdown} 
+                  customHeader={customHeader} 
+                  onRemoveHeader={() => setCustomHeader(null)} 
+                  codeTheme={codeTheme}
+                  setCodeTheme={setCodeTheme}
+                  isConfidential={isConfidential}
+                  docFooter={docFooter}
+                  viewerRef={viewerRef}
+                  onScroll={handleViewerScroll}
+                  onMouseEnter={() => { scrollingSourceRef.current = 'viewer'; }}
+                  onTouchStart={() => { scrollingSourceRef.current = 'viewer'; }}
+                />
+              )}
+            </>
+          } />
+          <Route path="/designer" element={
+            <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>Loading Designer...</div>}>
+              <MermaidDesigner codeTheme={codeTheme} />
+            </Suspense>
+          } />
+        </Routes>
       </main>
       <footer className="app-footer">
         <a href="https://www.linkedin.com/in/soumyadeep-dutta/" target="_blank" rel="noopener noreferrer">

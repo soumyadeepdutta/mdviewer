@@ -24,6 +24,7 @@ export default function Mermaid({ chart }) {
     let isMounted = true;
 
     const renderChart = async () => {
+      let id = `mermaid-${Math.random().toString(36).substring(2, 11)}`;
       try {
         setError(false);
         
@@ -35,9 +36,6 @@ export default function Mermaid({ chart }) {
           theme: isDark ? 'dark' : 'default',
           securityLevel: 'loose',
         });
-
-        // Generate a unique ID for the mermaid diagram
-        const id = `mermaid-${Math.random().toString(36).substring(2, 11)}`;
         
         const { svg } = await mermaid.render(id, chart);
         
